@@ -1,6 +1,6 @@
 import customtkinter as ctk
 
-items = []
+items = {}
 
 class Item():
     def __init__(self, name, price, quantity, customer_name):
@@ -18,10 +18,13 @@ class UserInput():
     
     def add_to_cart(self):
         # Check if quantity is a valid input
+        
         try:
             int(self.quantityEntry.get())
             price = float(self.priceEntry.get())
-            items.append(Item(self.itemNameEntry.get(), price, self.quantityEntry.get(), self.customerNameEntry.get()))
+
+            recieptId = len(items.keys()) + 1
+            items[str(recieptId)] = Item(self.itemNameEntry.get(), price, self.quantityEntry.get(), self.customerNameEntry.get())
 
             self.customerNameEntry.delete(0, ctk.END)
             self.itemNameEntry.delete(0, ctk.END)
@@ -95,8 +98,9 @@ class Reciept:
         self.reciept.delete("1.0", ctk.END)
         
         tempStr = ""
-        for item in items:
-            tempStr += f"Customer Name: {item.customer_name}\nItem: {item.name}\nPrice: {item.price}\nQuantity: {item.quantity}\n\n"
+        for key in items.keys():
+            value = items[key]
+            tempStr += f"Reciept ID: {key}\nCustomer Name: {value.customer_name}\nItem: {value.name}\nPrice: {value.price}\nQuantity: {value.quantity}\n\n"
 
         self.reciept.insert(ctk.END, tempStr)
 
@@ -117,3 +121,5 @@ if __name__ == "__main__":
     userInputFrame.grid(row=0, column=0, padx=10, pady=10)
     userInputInstance = UserInput(userInputFrame, recieptInstance)
     window.mainloop()
+
+# TODO: Rename add to cart to checkout, remove checkout. add an admin place to remove orders via reciept ID.
