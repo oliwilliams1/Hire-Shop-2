@@ -1,13 +1,35 @@
 import customtkinter as ctk
 
-class userInput():
+class Item():
+    def __init__(self, name, price, quantity):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+
+class UserInput():
     def __init__(self, frame):
         self.frame = frame
         self.items = []
 
         self.create_widgets()
     
-    def add_to_cart(self): ...
+    def add_to_cart(self):
+        # Check if quantity is a valid input
+        try:
+            int(self.quantityEntry.get())
+            
+        except:
+            errorWindow = ctk.CTk()
+            errorWindow.title("Error")
+            errorWindow.geometry("200x50")
+            errorWindow.resizable(False, False)
+
+            errorLabel = ctk.CTkLabel(errorWindow, text="Invalid quantity!", font=("Arial", 24))
+            errorLabel.pack(anchor="center", pady=10)
+
+            errorWindow.mainloop()
+
+        
     def checkout(self): ...
 
     def create_widgets(self):
@@ -60,7 +82,7 @@ if __name__ == "__main__":
 
     userInputFrame = ctk.CTkFrame(window, width=300, height=200)
     userInputFrame.grid(row=0, column=0, padx=10, pady=10)
-    userInputInstance = userInput(userInputFrame)
+    userInputInstance = UserInput(userInputFrame)
 
     rectieptFrame = ctk.CTkFrame(window, width=300, height=200)
     rectieptFrame.grid(row=0, column=1, padx=10, pady=10)
