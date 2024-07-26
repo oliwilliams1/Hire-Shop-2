@@ -18,7 +18,6 @@ class UserInput():
     
     def add_to_cart(self):
         # Check if quantity is a valid input
-        
         try:
             int(self.quantityEntry.get())
             price = float(self.priceEntry.get())
