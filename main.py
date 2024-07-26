@@ -2,6 +2,17 @@ import customtkinter as ctk
 
 items = {}
 
+def error_window(errorMessage : str):
+    errorWindow = ctk.CTk()
+    errorWindow.title("Error")
+    errorWindow.geometry("200x50")
+    errorWindow.resizable(False, False)
+
+    errorLabel = ctk.CTkLabel(errorWindow, text=errorMessage, font=("Arial", 18))
+    errorLabel.pack(anchor="center", pady=10)
+
+    errorWindow.mainloop()
+
 class Item():
     def __init__(self, name, price, quantity, customer_name):
         self.name = name
@@ -16,7 +27,7 @@ class UserInput():
 
         self.create_widgets()
     
-    def add_to_cart(self):
+    def checkout(self):
         # Check if quantity is a valid input
         try:
             int(self.quantityEntry.get())
@@ -29,21 +40,10 @@ class UserInput():
             self.itemNameEntry.delete(0, ctk.END)
             self.priceEntry.delete(0, ctk.END)
             self.quantityEntry.delete(0, ctk.END)
+            self.recieptInstance.update_widgets()
 
         except:
-            errorWindow = ctk.CTk()
-            errorWindow.title("Error")
-            errorWindow.geometry("200x50")
-            errorWindow.resizable(False, False)
-
-            errorLabel = ctk.CTkLabel(errorWindow, text="Invalid quantity or price!", font=("Arial", 18))
-            errorLabel.pack(anchor="center", pady=10)
-
-            errorWindow.mainloop()
-
-        
-    def checkout(self):
-        self.recieptInstance.update_widgets()
+            error_window("Invalid quantity or price!")
 
     def create_widgets(self):
         gridFrame = ctk.CTkFrame(self.frame)
@@ -62,8 +62,7 @@ class UserInput():
         self.quantityEntry = ctk.CTkEntry(gridFrame, placeholder_text="Enter quantity")
 
         # Buttons
-        addToCart = ctk.CTkButton(self.frame, text="Add to Cart", command=self.add_to_cart)
-        checkout = ctk.CTkButton(self.frame, text="Checkout", command=self.checkout)
+        checkout = ctk.CTkButton(self.frame, text="Add to Cart", command=self.checkout)
 
         # Place on screen for mainloop to utilize (sticky = "E" for aligning on the right)
         customerName.grid(row=0, column=0, padx=10, pady=10, sticky="E")
@@ -78,7 +77,6 @@ class UserInput():
         self.quantityEntry.grid(row=3, column=1, padx=10, pady=10, sticky="W")
 
         # Pack the buttons outside the grid frame
-        addToCart.pack(padx=10, pady=10)
         checkout.pack(padx=10, pady=10)
 
 class Reciept:
@@ -107,6 +105,27 @@ class Reciept:
 
         print(tempStr)
 
+class EntryRemover():
+    def __init__(self, frame, recieptInstance):
+        self.frame = frame
+        self.create_widgets()
+        self.recieptInstance = recieptInstance
+
+    def remove_entry(self):
+        try:
+            del items[self.entry.get()]
+            self.recieptInstance.update_widgets()
+
+        except:
+            error_window("Invalid Reciept ID")    
+
+    def create_widgets(self):
+        self.entry = ctk.CTkEntry(self.frame, width=200, height=30)
+        self.entry.pack(padx=10, pady=10)
+
+        self.remove_button = ctk.CTkButton(self.frame, text="Remove", command=self.remove_entry)
+        self.remove_button.pack(padx=10, pady=10)
+
 if __name__ == "__main__":
     window = ctk.CTk()
     window.title("Julie's party hire shop")
@@ -119,6 +138,8 @@ if __name__ == "__main__":
     userInputFrame = ctk.CTkFrame(window, width=300, height=200)
     userInputFrame.grid(row=0, column=0, padx=10, pady=10)
     userInputInstance = UserInput(userInputFrame, recieptInstance)
-    window.mainloop()
 
-# TODO: Rename add to cart to checkout, remove checkout. add an admin place to remove orders via reciept ID.
+    recieptRemoverFrame = ctk.CTkFrame(window, width=300, height=200)
+    recieptRemoverFrame.grid(row=1, column=1, padx=10, pady=10)
+    recieptRemoverInstance = EntryRemover(recieptRemoverFrame, recieptInstance)
+    window.mainloop()
