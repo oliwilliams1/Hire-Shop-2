@@ -1,10 +1,8 @@
 import customtkinter as ctk
 
-class App():
-    def __init__(self, window):
-        self.window = window
-        self.window.title("Julie's party hire shop")
-        self.window.geometry("800x600")
+class userInput():
+    def __init__(self, frame):
+        self.frame = frame
         self.items = []
 
         self.create_widgets()
@@ -13,9 +11,7 @@ class App():
     def checkout(self): ...
 
     def create_widgets(self):
-        frame = ctk.CTkFrame(self.window)
-        frame.pack(padx=20, pady=20)
-        gridFrame = ctk.CTkFrame(frame)
+        gridFrame = ctk.CTkFrame(self.frame)
         gridFrame.pack()
 
         # Labels
@@ -29,8 +25,8 @@ class App():
         self.quantityEntry = ctk.CTkEntry(gridFrame, placeholder_text="Enter quantity")
 
         # Buttons
-        addToCart = ctk.CTkButton(frame, text="Add to Cart", command=self.add_to_cart)
-        checkout = ctk.CTkButton(frame, text="Checkout", command=self.checkout)
+        addToCart = ctk.CTkButton(self.frame, text="Add to Cart", command=self.add_to_cart)
+        checkout = ctk.CTkButton(self.frame, text="Checkout", command=self.checkout)
 
         # Place on screen for mainloop to utilize (sticky = "E" for aligning on the right)
         customerName.grid(row=0, column=0, padx=10, pady=10, sticky="E")
@@ -45,8 +41,28 @@ class App():
         # Pack the buttons outside the grid frame
         addToCart.pack(padx=10, pady=10)
         checkout.pack(padx=10, pady=10)
+
+class Reciept:
+    def __init__(self, frame):
+        self.frame = frame
+        self.create_reciept_widgets()
     
+    def create_reciept_widgets(self):
+        self.reciept = ctk.CTkTextbox(self.frame, width=300, height=200)
+        self.reciept.insert(ctk.END, "Reciept")
+        self.reciept.configure(state="disabled")
+        self.reciept.pack()
+
 if __name__ == "__main__":
     window = ctk.CTk()
-    app = App(window)
+    window.title("Julie's party hire shop")
+    window.geometry("800x600")
+
+    userInputFrame = ctk.CTkFrame(window, width=300, height=200)
+    userInputFrame.grid(row=0, column=0, padx=10, pady=10)
+    userInputInstance = userInput(userInputFrame)
+
+    rectieptFrame = ctk.CTkFrame(window, width=300, height=200)
+    rectieptFrame.grid(row=0, column=1, padx=10, pady=10)
+    recieptInstance = Reciept(rectieptFrame)
     window.mainloop()
