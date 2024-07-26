@@ -6,10 +6,11 @@ class Item():
         self.price = price
         self.quantity = quantity
 
+items = []
 class UserInput():
-    def __init__(self, frame):
+    def __init__(self, frame, recieptInstance):
         self.frame = frame
-        self.items = []
+        self.recieptInstance = recieptInstance
 
         self.create_widgets()
     
@@ -17,7 +18,12 @@ class UserInput():
         # Check if quantity is a valid input
         try:
             int(self.quantityEntry.get())
-            
+            items.append(Item(self.itemNameEntry.get(), 10, self.quantityEntry.get()))
+
+            self.customerNameEntry.delete(0, ctk.END)
+            self.itemNameEntry.delete(0, ctk.END)
+            self.quantityEntry.delete(0, ctk.END)
+
         except:
             errorWindow = ctk.CTk()
             errorWindow.title("Error")
@@ -30,7 +36,8 @@ class UserInput():
             errorWindow.mainloop()
 
         
-    def checkout(self): ...
+    def checkout(self):
+        self.recieptInstance.update_widgets()
 
     def create_widgets(self):
         gridFrame = ctk.CTkFrame(self.frame)
@@ -75,16 +82,29 @@ class Reciept:
         self.reciept.configure(state="disabled")
         self.reciept.pack()
 
+    def update_widgets(self):
+        self.reciept.configure(state="normal")
+        self.reciept.delete("1.0", ctk.END)
+        
+        for item in items:
+            tempStr += f"Item: {item.name}\nPrice: {item.price}\nQuantity: {item.quantity}\n"
+
+        self.reciept.insert(ctk.END, tempStr)
+
+        self.reciept.configure(state="disabled")
+
+        print(tempStr)
+
 if __name__ == "__main__":
     window = ctk.CTk()
     window.title("Julie's party hire shop")
     window.geometry("800x600")
 
-    userInputFrame = ctk.CTkFrame(window, width=300, height=200)
-    userInputFrame.grid(row=0, column=0, padx=10, pady=10)
-    userInputInstance = UserInput(userInputFrame)
-
     rectieptFrame = ctk.CTkFrame(window, width=300, height=200)
     rectieptFrame.grid(row=0, column=1, padx=10, pady=10)
     recieptInstance = Reciept(rectieptFrame)
+
+    userInputFrame = ctk.CTkFrame(window, width=300, height=200)
+    userInputFrame.grid(row=0, column=0, padx=10, pady=10)
+    userInputInstance = UserInput(userInputFrame, recieptInstance)
     window.mainloop()
