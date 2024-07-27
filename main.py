@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
+import random
 
 # To install Libraries run in terminal,
 # pip install customtkinter
@@ -55,11 +56,42 @@ def error_window(errorMessage : str):
     # Run mainloop to display the window until closed
     errorWindow.mainloop()
 
+# Gets the total of all items in item history
 def getTotal() -> float:
     price = 0
     for item in itemHistory:
         price += calculateTotalPrice(item)
     return price
+
+def generate_example_data():
+    # Set a few variables with names and stuff
+    firstNames = ["John", "Jane", "Bob", "Alice", "Charlie", "Daisy", "Ethan", "Fiona", "George", "Hannah"]
+    LastNames = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor"]
+    birthdayServices = ["Baloons", "Cakes", "Photography", "Decorations", "Music", "Food", "Drinks"]
+
+    #for item in items:
+    #    del item # RuntimeError: dictionary changed size during iteration
+
+    # Delete all entries for items
+    items.clear()
+    itemHistory.clear()
+
+    # Make 3 entries
+    for i in range(3):
+        # Get data needed to populate item class
+        recieptId = str(i + 1)
+        name = f"{random.choice(firstNames)} {random.choice(LastNames)}"
+        service = random.choice(birthdayServices)
+        price = abs(random.random()) * 250
+        price = round(price, 2)
+        quantity = random.randint(1, 5)
+        
+        # Generate the Item class
+        item = Item(name=service, price=price, quantity=quantity, customer_name=name)
+
+        # Add them to dictionary and list
+        items[recieptId] = item
+        itemHistory.append(item)
 
 class UserInput(): # A class that deals with user input and interacts with the items dictionary and reciept
     def __init__(self, frame, recieptInstance):
@@ -243,6 +275,10 @@ class EntryRemover():
         self.create_widgets()
         self.recieptInstance = recieptInstance
     
+    def gen_example_data(self):
+        generate_example_data()
+        recieptInstance.update_widgets()
+
     # Initialise correct widgets
     def create_widgets(self):
         # Describe this section of the GUI
@@ -254,8 +290,11 @@ class EntryRemover():
         self.entry.pack(padx=PDG, pady=PDG)
 
         # A button that attempts to remove the entry from the reciept
-        self.remove_button = ctk.CTkButton(self.frame, text="Remove", command=self.remove_entry)
-        self.remove_button.pack(padx=PDG, pady=PDG)
+        self.removeButton = ctk.CTkButton(self.frame, text="Remove", command=self.remove_entry)
+        self.removeButton.pack(padx=PDG, pady=PDG)
+
+        self.exampleDataButton = ctk.CTkButton(self.frame, text="Example Data", command=self.gen_example_data)
+        self.exampleDataButton.pack(padx=PDG, pady=PDG)
 
     def remove_entry(self): # Remove an entry
         try:
