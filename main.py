@@ -6,8 +6,6 @@ from PIL import Image
 # pip install pillow
 # Then this program will work
 
-#TODO: add one more constant, add a window for total history of everything (another dictionary), negative number checking
-
 # I use classes instead of multidimensional arrays as they are more efficient, appliccable and easier to use
 class Item():
     def __init__(self, name, price, quantity, customer_name):
@@ -20,8 +18,10 @@ class Item():
 MAIN_WINDOW_WIDTH = 865
 MAIN_WINDOW_HEIGHT = 370
 PDG = 10 # Padding, all padding is the same because of my theme
+GST = 0.15
 
-items = {} # Stored as string RecieptID : Item class
+items = {} # Stored as string RecieptID : Item class\
+itemHistory = [] # No item gets deleted from here, it is a full history
 
 # Helpfer function, returns the total price of an item from the Item class
 def calculateTotalPrice(item : Item) -> float:
@@ -54,6 +54,12 @@ def error_window(errorMessage : str):
 
     # Run mainloop to display the window until closed
     errorWindow.mainloop()
+
+def getTotal() -> float:
+    price = 0
+    for item in itemHistory:
+        price += calculateTotalPrice(item)
+    return price
 
 class UserInput(): # A class that deals with user input and interacts with the items dictionary and reciept
     def __init__(self, frame, recieptInstance):
@@ -148,6 +154,21 @@ class UserInput(): # A class that deals with user input and interacts with the i
             error_window("Please enter a valid price")
             return
         
+        # The number input boxes (reciept ID, quantity, and price) are all numbers
+        # Now we check if they are negative
+
+        if int(self.recieptIDEntry.get()) < 0:
+            error_window("Please enter a positive reciept ID")
+            return
+        
+        if int(self.quantityEntry.get()) < 0:
+            error_window("Please enter a positive quantity")
+            return
+        
+        if float(self.priceEntry.get()) < 0:
+            error_window("Please enter a positive price")
+            return
+        
         # Check if reciept ID is already in the dictionary
         if self.recieptIDEntry.get() in items.keys():
             error_window("Reciept ID already exists")
@@ -161,10 +182,14 @@ class UserInput(): # A class that deals with user input and interacts with the i
         recieptId = self.recieptIDEntry.get()
 
         # Note im using a class to store this instead of a multidimensional array as its better practice for cleaner code
-        items[recieptId] = Item(self.itemNameEntry.get(), 
-                                     price, 
-                                     self.quantityEntry.get(), 
-                                     self.customerNameEntry.get())
+        item = Item(self.itemNameEntry.get(), 
+            price, 
+            self.quantityEntry.get(), 
+            self.customerNameEntry.get())
+        items[recieptId] = item
+        
+        # Add to the list that has the full history of items
+        itemHistory.append(item)
 
         # Delete entries, fresh for a new input
         self.customerNameEntry.delete(0, ctk.END)
@@ -201,7 +226,14 @@ class Reciept: # A reciept viewer class
             value = items[key]
             tempStr += make_reciept_entry(key, value)
 
-        self.reciept.insert(ctk.END, tempStr) # Display the entries
+        # Get the total including GST, and display it
+        total = getTotal()
+        tempStr += f"Total since started incl GST: {total}\n"
+
+        # Get total excluding GST, which acts as money Julie gets
+        tempStr += f"Total since started excl GST: {total / 1 - GST}"
+
+        self.reciept.insert(ctk.END, tempStr) # Display all the data formatted in tempStr
         self.reciept.configure(state="disabled") # Lock it again
 
 class EntryRemover():
