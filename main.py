@@ -32,14 +32,14 @@ def calculateTotalPrice(item : Item) -> float:
 def make_reciept_entry(reciept_id : str, item : Item) -> str:
     # Create a string to store the reciept entry
     # "\n" = new line
-    tempStr = ""
-    tempStr += f"Reciept ID: {reciept_id}\n"
-    tempStr += f"Customer Name: {item.customer_name}\n"
-    tempStr += f"Item: {item.name}\n"
-    tempStr += f"Price: ${item.price}\n"
-    tempStr += f"Quantity: {item.quantity}\n"
-    tempStr += f"Total Price: ${calculateTotalPrice(item)}\n\n"
-    return tempStr
+    recieptId_s = f"Reciept ID: {reciept_id}"
+    customerName_s = f"Customer Name: {item.customer_name}"
+    item_s = f"Item: {item.name}"
+    price_s = f"Price: ${item.price}"
+    quantity_s = f"Quantity: {item.quantity}"
+    totalPrice_s = f"Total Price: ${calculateTotalPrice(item)}"
+
+    return f"{recieptId_s}\n{customerName_s}\n{item_s}\n{price_s}\n{quantity_s}\n{totalPrice_s}\n\n"
 
 # An error window class to have a pop up with whatever error
 def error_window(errorMessage : str):
