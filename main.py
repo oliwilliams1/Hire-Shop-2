@@ -2,18 +2,10 @@ import customtkinter as ctk
 from PIL import Image
 import random
 
-# To install Libraries run in terminal,
+# To install Libraries run the following commands in your terminal
 # pip install customtkinter
 # pip install pillow
-# Then this program will work
-
-# I use classes instead of multidimensional arrays as they are more efficient, appliccable and easier to use
-class Item():
-    def __init__(self, name, price, quantity, customer_name):
-        self.name = name
-        self.price = price
-        self.quantity = quantity
-        self.customer_name = customer_name
+# If there is a problem with pip, consault me
 
 # Global variables
 MAIN_WINDOW_WIDTH = 865
@@ -23,6 +15,14 @@ GST = 0.15
 
 items = {} # Stored as string RecieptID : Item class\
 itemHistory = [] # No item gets deleted from here, it is a full history
+
+# I use classes instead of multidimensional arrays as they are more efficient, appliccable and easier to use
+class Item(): # A class holding neccassary data of an item
+    def __init__(self, name, price, quantity, customer_name):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+        self.customer_name = customer_name
 
 # Helpfer function, returns the total price of an item from the Item class
 def calculateTotalPrice(item : Item) -> float:
@@ -35,10 +35,10 @@ def make_reciept_entry(reciept_id : str, item : Item) -> str:
     recieptId_s = f"Reciept ID: {reciept_id}"
     customerName_s = f"Customer Name: {item.customer_name}"
     item_s = f"Item: {item.name}"
-    price_s = f"Price: ${item.price}"
+    price_s = f"Price: ${item.price:.2f}"
     quantity_s = f"Quantity: {item.quantity}"
-    totalPrice_s = f"Total Price: ${calculateTotalPrice(item)}"
-
+    totalPrice_s = f"Total Price: ${calculateTotalPrice(item):.2f}"
+    print(f"{recieptId_s}\n{customerName_s}\n{item_s}\n{price_s}\n{quantity_s}\n{totalPrice_s}\n\n")
     return f"{recieptId_s}\n{customerName_s}\n{item_s}\n{price_s}\n{quantity_s}\n{totalPrice_s}\n\n"
 
 # An error window class to have a pop up with whatever error
@@ -69,9 +69,6 @@ def generate_example_data():
     LastNames = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor"]
     birthdayServices = ["Baloons", "Cakes", "Photography", "Decorations", "Music", "Food", "Drinks"]
 
-    #for item in items:
-    #    del item # RuntimeError: dictionary changed size during iteration
-
     # Delete all entries for items
     items.clear()
     itemHistory.clear()
@@ -93,7 +90,18 @@ def generate_example_data():
         items[recieptId] = item
         itemHistory.append(item)
 
-class UserInput(): # A class that deals with user input and interacts with the items dictionary and reciept
+# Adds an image (logo) to the top of the window on init
+def addImageInit():
+    # Open image using PIL
+    logo = Image.open("Logo.png")
+
+    # Convert to CTkImage
+    logoCTk = ctk.CTkImage(light_image=logo, size=(95, 41))
+
+    # Place the image
+    ctk.CTkLabel(window, image=logoCTk, text="").grid(row=0, column=1, pady=PDG)
+
+class UserInput(): # A class that deals with user input and interacts with the items dictionary and reciept viewer
     def __init__(self, frame, recieptInstance):
         # This class is passed a frame which is in the main window, the frame is used for placing widgets for user input
         self.frame = frame
@@ -190,15 +198,15 @@ class UserInput(): # A class that deals with user input and interacts with the i
         # Now we check if they are negative
 
         if int(self.recieptIDEntry.get()) < 0:
-            error_window("Please enter a positive reciept ID")
+            error_window("Reciept ID can not be less that 0")
             return
         
         if int(self.quantityEntry.get()) < 0:
-            error_window("Please enter a positive quantity")
+            error_window("Quantity cannot be negative")
             return
         
         if float(self.priceEntry.get()) < 0:
-            error_window("Please enter a positive price")
+            error_window("Price cannot be negative")
             return
         
         # Check if reciept ID is already in the dictionary
@@ -206,6 +214,18 @@ class UserInput(): # A class that deals with user input and interacts with the i
             error_window("Reciept ID already exists")
             return
         
+        if int(self.recieptIDEntry.get()) > 9999:
+            error_window("Reciept ID must be less than 10000")
+            return
+    
+        if int(self.quantityEntry.get()) > 99:
+            error_window("Quantity must be less than 100")
+            return
+
+        if float(self.priceEntry.get()) > 9999:
+            error_window("Price must be less than 10000")
+            return
+
         # If it gets here, all checks are a sucssess!
 
         # Store the entry
@@ -233,7 +253,7 @@ class UserInput(): # A class that deals with user input and interacts with the i
         # Update the reciept viewer via the instance
         self.recieptInstance.update_widgets()
 
-class Reciept: # A reciept viewer class
+class Reciept: # A reciept viewer class to view items currently on hire etc
     def __init__(self, frame):
         # This class is passed a frame which is in the main window, the frame is used for placing widgets to display the entries
         self.frame = frame
@@ -260,15 +280,15 @@ class Reciept: # A reciept viewer class
 
         # Get the total including GST, and display it
         total = getTotal()
-        tempStr += f"Total since started incl GST: {total}\n"
+        tempStr += f"Total since started incl GST: {total:.2f}\n"
 
         # Get total excluding GST, which acts as money Julie gets
-        tempStr += f"Total since started excl GST: {total / 1 - GST}"
+        tempStr += f"Total since started excl GST: {total / (1 + GST):.2f}"
 
         self.reciept.insert(ctk.END, tempStr) # Display all the data formatted in tempStr
         self.reciept.configure(state="disabled") # Lock it again
 
-class EntryRemover():
+class EntryRemover(): # Removes entrys i.e. item is returned
     def __init__(self, frame, recieptInstance):
         # Initialize variables
         self.frame = frame
@@ -311,33 +331,32 @@ class EntryRemover():
         # Remove any text in the entry fresh for new input
         self.entry.delete(0, ctk.END)
 
-# Starts here
+# Code starts here
 if __name__ == "__main__":
     # Make a window with correct settings
     window = ctk.CTk()
     window.title("Julie's party hire shop")
     window.geometry(f"{MAIN_WINDOW_WIDTH}X{MAIN_WINDOW_HEIGHT}")
+    window._set_appearance_mode("dark")
+    window.resizable(False, False)
 
-    # Open image using PIL
-    logo = Image.open("Logo.png")
-
-    # Convert to CTkImage
-    logoCTk = ctk.CTkImage(light_image=logo, size=(95, 41))
-
-    # Place the image
-    ctk.CTkLabel(window, image=logoCTk, text="").grid(row=0, column=1, pady=PDG)
+    # Adds an image (logo) in init (initialization of window)
+    addImageInit()
 
     # Make frames for classes to populate
+    # Reciept viewer (items currently on hire) on the middle
     recieptFrame = ctk.CTkFrame(window, width=300, height=200)
     recieptFrame.grid(row=1, column=1, padx=PDG)
 
+    # User input (add) on the left
     userInputFrame = ctk.CTkFrame(window, width=300, height=200)
     userInputFrame.grid(row=1, column=0, padx=PDG, pady=PDG)
 
+    # User input (remoev items) on the right
     recieptRemoverFrame = ctk.CTkFrame(window, width=300, height=200)
     recieptRemoverFrame.grid(row=1, column=3, padx=PDG, pady=PDG)
 
-    # Run the classes so they populate the frames
+    # Run the classes so they populate the frames and run independantly
     recieptInstance = Reciept(recieptFrame)
     userInputInstance = UserInput(userInputFrame, recieptInstance) # Add recieptInstance as a parameter so it can be used in the class
     recieptRemoverInstance = EntryRemover(recieptRemoverFrame, recieptInstance) # Add recieptInstance as a parameter so it can be used in the class
