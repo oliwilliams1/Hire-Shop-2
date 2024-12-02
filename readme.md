@@ -1,7 +1,7 @@
 # Julie's hire shop
 This is a small project for ncea l2's as91896 using python to create an interface for a hire shop. 
 
-![program](image.png)
+![program](screenshot.png)
 
 ### Libraries
 I use **customtkinter** for the gui, and use it over tkinter to have a more modern and sleek look.<br>
